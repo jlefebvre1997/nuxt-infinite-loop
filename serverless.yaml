@@ -1,0 +1,45 @@
+service: test-nuxt
+frameworkVersion: "2"
+useDotenv: true
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${env:NODE_ENV, 'local'}
+  region: eu-west-1
+  lambdaHashingVersion: "20201221"
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+  environment:
+    # stops telemetry output from nuxt
+    NUXT_TELEMETRY_DISABLED: 1
+  stackName: ${self:provider.stage}-${self:service}-sls-stack-frontend
+  deploymentBucket: ${self:provider.stage}-lambda-repo-frontend
+
+functions:
+  nuxt:
+    handler: src/handler/index.index
+    events:
+      - http:
+          path: /
+          method: get
+      - http:
+          path: /{proxy+}
+          method: get
+
+package:
+  include:
+    # ensures that the build output gets packaged
+    - .nuxt/**
+
+custom:
+  serverless-offline:
+    host: nuxt.local
+    httpPort: 80
+    noPrependStageInUrl: true
+    noTimeout: true
+    stage: dev
+
+plugins:
+  - serverless-offline
+  - serverless-scriptable-plugin

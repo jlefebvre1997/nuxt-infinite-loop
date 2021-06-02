@@ -1,0 +1,30 @@
+version: '2.1'
+
+services:
+  node:
+    build:
+      context: docker/node
+    working_dir: /srv
+    volumes:
+      - ./:/srv/
+    command: npm run dev
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=443
+      - DOMAIN_NAME=default:nuxt.local
+    expose:
+      - 80
+
+  serverless:
+    build:
+      context: docker/serverless
+    working_dir: /srv
+    volumes:
+      - ./:/srv/
+      - ~/.aws:/home/.aws
+    environment:
+      - LAMBDA_MOUNT_CWD=$PWD
+      - DOMAIN_NAME=default:nuxt.local
+      - HOST=nuxt.local
+    expose:
+      - 80
